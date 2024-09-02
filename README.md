@@ -1,2 +1,2 @@
 # EthActs
-Automating virtue, improving lives (EthActs Website)
+Automating virtue, improving lives (EthActs Software Code)
