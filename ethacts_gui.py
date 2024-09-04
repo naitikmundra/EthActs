@@ -1,37 +1,72 @@
-import wx
-import wx.lib.agw.aui as aui
+from kivy.app import App
+from kivy.uix.tabbedpanel import TabbedPanel
+from kivy.uix.tabbedpanel import TabbedPanelItem
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.popup import Popup
+from kivy.core.window import Window
 
-class EthActsApp(wx.App):
-    def OnInit(self):
-        frame = EthActsFrame(None, title="EthActs", size=(800, 600))
-        frame.Show()
-        return True
+class EthActsApp(App):
+    def build(self):
+        self.title = "EthActs"
+        Window.size = (800, 600)
 
-class EthActsFrame(wx.Frame):
-    def __init__(self, *args, **kw):
-        super(EthActsFrame, self).__init__(*args, **kw)
+        # Main Tabbed Panel
+        self.tab_panel = TabbedPanel()
 
-        # Apply a dark theme
-        self.SetBackgroundColour(wx.Colour(45, 45, 48))
-        self.SetForegroundColour(wx.Colour(240, 240, 240))
+        # Quotes Tab
+        self.quotes_panel = BoxLayout(orientation='vertical')
+        self.quote_text = TextInput(readonly=True, font_size=14)
+        self.quote_text.background_color = (0.18, 0.18, 0.18, 1)  # Background color
+        self.quote_text.foreground_color = (0.94, 0.94, 0.94, 1)  # Text color
 
-        self.notebook = aui.AuiNotebook(self, style=aui.AUI_NB_TOP | aui.AUI_NB_CLOSE_ON_ALL_TABS)
-        self.notebook.SetArtProvider(aui.AuiSimpleTabArt())
+        self.quotes_panel.add_widget(self.quote_text)
 
-        self.quotes_panel = QuotesPanel(self.notebook)
-        self.quiz_panel = QuizPanel(self.notebook)
-
-        self.notebook.AddPage(self.quotes_panel, "Quotes")
-        self.notebook.AddPage(self.quiz_panel, "Quiz")
-
-        self.Bind(wx.EVT_CLOSE, self.on_close)
+        quotes_tab = TabbedPanelItem(text='Quotes')
+        quotes_tab.add_widget(self.quotes_panel)
+        self.tab_panel.add_widget(quotes_tab)
 
         self.update_quotes()
+
+        # Quiz Tab
+        self.quiz_panel = BoxLayout(orientation='vertical')
+        question_label = Label(text="What is the capital of France?", font_size=18)
+        self.quiz_panel.add_widget(question_label)
+
+        self.options = ["Berlin", "Madrid", "Paris", "Rome"]
+        self.option_checkboxes = []
+        self.selected_option = None
+
+        for option in self.options:
+            box_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=30)
+            checkbox = CheckBox(group='quiz')
+            checkbox.bind(active=self.on_option_selected)
+            label = Label(text=option)
+
+            box_layout.add_widget(checkbox)
+            box_layout.add_widget(label)
+
+            self.quiz_panel.add_widget(box_layout)
+            self.option_checkboxes.append((checkbox, option))
+
+        submit_button = Button(text="Submit")
+        submit_button.bind(on_release=self.on_submit)
+        self.quiz_panel.add_widget(submit_button)
+
+        quiz_tab = TabbedPanelItem(text='Quiz')
+        quiz_tab.add_widget(self.quiz_panel)
+        self.tab_panel.add_widget(quiz_tab)
+
+        return self.tab_panel
 
     def update_quotes(self):
         quotes = self.read_all_quotes()
         if quotes:
-            self.quotes_panel.update_quotes(quotes)
+            self.quote_text.text = "".join(quotes)
+        self.quote_text.scroll_y = 1.0  # Ensure the text starts from the top
 
     def read_all_quotes(self):
         try:
@@ -40,56 +75,19 @@ class EthActsFrame(wx.Frame):
         except FileNotFoundError:
             return ["No quotes available."]
 
-    def on_close(self, event):
-        self.Destroy()
+    def on_option_selected(self, checkbox, value):
+        if value:
+            for cb, option in self.option_checkboxes:
+                if cb == checkbox:
+                    self.selected_option = option
+                    break
 
-class QuotesPanel(wx.Panel):
-    def __init__(self, parent):
-        super(QuotesPanel, self).__init__(parent)
+    def on_submit(self, instance):
+        if self.selected_option:
+            popup = Popup(title='Quiz Result',
+                          content=Label(text=f'You selected: {self.selected_option}'),
+                          size_hint=(0.5, 0.5))
+            popup.open()
 
-        self.SetBackgroundColour(wx.Colour(30, 30, 30))
-        self.SetForegroundColour(wx.Colour(240, 240, 240))
-
-        self.quote_text = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.BORDER_NONE)
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.quote_text, 1, wx.EXPAND | wx.ALL, 10)
-        self.SetSizer(sizer)
-
-    def update_quotes(self, quotes):
-        self.quote_text.SetValue("".join(quotes))
-
-class QuizPanel(wx.Panel):
-    def __init__(self, parent):
-        super(QuizPanel, self).__init__(parent)
-
-        self.SetBackgroundColour(wx.Colour(30, 30, 30))
-        self.SetForegroundColour(wx.Colour(240, 240, 240))
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
-        # Add a question
-        question = wx.StaticText(self, label="What is the capital of France?")
-        question.SetFont(wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
-        sizer.Add(question, 0, wx.ALL, 10)
-
-        # Add multiple choice options
-        self.options = ["Berlin", "Madrid", "Paris", "Rome"]
-        self.radio_box = wx.RadioBox(self, choices=self.options, style=wx.RA_SPECIFY_COLS)
-        sizer.Add(self.radio_box, 0, wx.ALL, 10)
-
-        # Add a submit button
-        submit_button = wx.Button(self, label="Submit")
-        submit_button.Bind(wx.EVT_BUTTON, self.on_submit)
-        sizer.Add(submit_button, 0, wx.ALL | wx.ALIGN_CENTER, 10)
-
-        self.SetSizer(sizer)
-
-    def on_submit(self, event):
-        selected_option = self.radio_box.GetStringSelection()
-        print(f"Selected option: {selected_option}")
-        wx.MessageBox(f"You selected: {selected_option}", "Quiz Result", wx.OK | wx.ICON_INFORMATION)
-
-if __name__ == "__main__":
-    app = EthActsApp()
-    app.MainLoop()
+if __name__ == '__main__':
+    EthActsApp().run()

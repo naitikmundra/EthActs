@@ -10,35 +10,33 @@ class NotificationService:
         self.quote_file = "quotes.txt"
 
     def onclick(self):
-        print("Notification clicked")
-
+        self.run_gui()
     def play_sound(self):
         playsound("notify.wav")
+    def run_gui(self):
+        app = wx.App(False)
+        frame = EthActsApp()
+        app.MainLoop()
 
     def show_notification(self):
         try:
             toaster = win10toast_click.ToastNotifier()
             quote = q.get_random_quote()[0]
-            toaster.show_toast(
-                " ", quote, icon_path="notification.ico", callback_on_click=self.onclick
-            )
             self.save_quote(quote)
+
+            toaster.show_toast(
+                "EthActs", quote, icon_path="notification.ico", callback_on_click=self.onclick
+            )
             print("Notification showed")
         except Exception as e:
             print(f"Exception in show_notification: {e}")
 
     def save_quote(self, quote):
-        # Read the existing quotes
-        try:
-            with open(self.quote_file, "r") as file:
-                existing_quotes = file.readlines()
-        except FileNotFoundError:
-            existing_quotes = []
+        
 
         # Write the new quote at the beginning of the file
-        with open(self.quote_file, "w") as file:
-            file.write(quote + "\n")  # Write the new quote
-            file.writelines(existing_quotes)  # Append existing quotes
+        with open(self.quote_file, "a") as file:
+            file.write("\n" + quote + "\n")  # Write the new quote
 
     def start_service(self):
         while True:
