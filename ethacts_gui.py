@@ -8,11 +8,18 @@ from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.popup import Popup
 from kivy.core.window import Window
+import sys
+from kivy.uix.image import Image
 
 class EthActsApp(App):
-    def build(self):
+    def __init__(self, initial_tab=1, **kwargs):
+        super().__init__(**kwargs)
+        self.initial_tab = initial_tab
+
+    def build(self, initial_tab=1, **kwargs):
         self.title = "EthActs"
         Window.size = (800, 600)
+        Window.bind(on_request_close=self.on_request_close)  # Bind the close event
 
         # Main Tabbed Panel
         self.tab_panel = TabbedPanel()
@@ -56,10 +63,25 @@ class EthActsApp(App):
         submit_button.bind(on_release=self.on_submit)
         self.quiz_panel.add_widget(submit_button)
 
-        quiz_tab = TabbedPanelItem(text='Quiz')
+        quiz_tab = TabbedPanelItem(text='Day Report')
         quiz_tab.add_widget(self.quiz_panel)
         self.tab_panel.add_widget(quiz_tab)
+        self.tab_panel.default_tab_text = 'Being Ethical'
+        todo = TabbedPanelItem(text='To Do')
+        self.tab_panel.add_widget(todo)
 
+        # Create an Image widget
+        image = Image(source='Ethical.png')
+
+        # Set the image as the content of the default tab
+        self.tab_panel.default_tab_content = image
+
+        # Set the default tab based on the initial_tab argument
+        if self.initial_tab == 2:
+            self.tab_panel.switch_to(quiz_tab)
+        else:
+            self.tab_panel.switch_to(quotes_tab)
+            
         return self.tab_panel
 
     def update_quotes(self):
@@ -89,5 +111,20 @@ class EthActsApp(App):
                           size_hint=(0.5, 0.5))
             popup.open()
 
+    def on_request_close(self, *args):
+        # This method will be called when the close button is clicked
+        self.stop()  # Stop the application cleanly
+        return True  # Return True to indicate that the window can be closed
+
+    
+
 if __name__ == '__main__':
-    EthActsApp().run()
+    # Parse command-line arguments
+    initial_tab = 1
+    if len(sys.argv) > 1:
+        try:
+            initial_tab = int(sys.argv[1])
+        except ValueError:
+            pass  # Use default if argument is not an integer
+
+    EthActsApp(initial_tab=initial_tab).run()

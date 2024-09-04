@@ -10,13 +10,17 @@ class NotificationService:
         self.quote_file = "quotes.txt"
 
     def onclick(self):
-        self.run_gui()
+        # run_ethacts.py
+
+        from ethacts_gui import EthActsApp
+        
+        EthActsApp(initial_tab=1).run()
+
+    # Example: Open the Quiz tab (tab 2)
+    # EthActsApp(initial_tab=2).run()
     def play_sound(self):
         playsound("notify.wav")
-    def run_gui(self):
-        app = wx.App(False)
-        frame = EthActsApp()
-        app.MainLoop()
+    
 
     def show_notification(self):
         try:
