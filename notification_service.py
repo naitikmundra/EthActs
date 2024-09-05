@@ -16,8 +16,7 @@ class NotificationService:
         
         EthActsApp(initial_tab=1).run()
 
-    # Example: Open the Quiz tab (tab 2)
-    # EthActsApp(initial_tab=2).run()
+    
     def play_sound(self):
         playsound("assets/notify.wav")
     
@@ -38,7 +37,6 @@ class NotificationService:
     def save_quote(self, quote):
         
 
-        # Write the new quote at the beginning of the file
         with open(self.quote_file, "a") as file:
             file.write("\n" + quote + "\n")  # Write the new quote
 
