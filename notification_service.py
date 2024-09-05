@@ -7,7 +7,7 @@ import stoicquote as q
 
 class NotificationService:
     def __init__(self):
-        self.quote_file = "quotes.txt"
+        self.quote_file = "assets/quotes.txt"
 
     def onclick(self):
         # run_ethacts.py
@@ -19,7 +19,7 @@ class NotificationService:
     # Example: Open the Quiz tab (tab 2)
     # EthActsApp(initial_tab=2).run()
     def play_sound(self):
-        playsound("notify.wav")
+        playsound("assets/notify.wav")
     
 
     def show_notification(self):
@@ -29,7 +29,7 @@ class NotificationService:
             self.save_quote(quote)
 
             toaster.show_toast(
-                "EthActs", quote, icon_path="notification.ico", callback_on_click=self.onclick
+                "EthActs", quote, icon_path="assets/notification.ico", callback_on_click=self.onclick
             )
             print("Notification showed")
         except Exception as e:
