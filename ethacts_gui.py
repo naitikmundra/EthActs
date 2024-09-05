@@ -19,8 +19,7 @@ class EthActsApp(App):
     def build(self, initial_tab=1, **kwargs):
         self.title = "EthActs"
         Window.size = (800, 600)
-        Window.bind(on_request_close=self.on_request_close)  # Bind the close event
-
+        Window.bind(on_request_close=self.on_request_close) 
         # Main Tabbed Panel
         self.tab_panel = TabbedPanel()
 
@@ -38,7 +37,6 @@ class EthActsApp(App):
 
         self.update_quotes()
 
-        # Quiz Tab
         self.quiz_panel = BoxLayout(orientation='vertical')
         question_label = Label(text="Did you get angry today?", font_size=18)
         self.quiz_panel.add_widget(question_label)
@@ -73,10 +71,9 @@ class EthActsApp(App):
         # Create an Image widget
         image = Image(source='assets/Ethical.png')
 
-        # Set the image as the content of the default tab
+        # IMAGE LOGO HERE
         self.tab_panel.default_tab_content = image
 
-        # Set the default tab based on the initial_tab argument
         if self.initial_tab == 2:
             self.tab_panel.switch_to(quiz_tab)
         else:
@@ -88,7 +85,7 @@ class EthActsApp(App):
         quotes = self.read_all_quotes()
         if quotes:
             self.quote_text.text = "".join(quotes)
-        self.quote_text.scroll_y = 1.0  # Ensure the text starts from the top
+        self.quote_text.scroll_y = 1.0  
 
     def read_all_quotes(self):
         try:
@@ -106,13 +103,13 @@ class EthActsApp(App):
 
     def on_submit(self, instance):
         if self.selected_option:
+            
             popup = Popup(title='Day report!',
                           content=Label(text=f'You selected: {self.selected_option}'),
                           size_hint=(0.5, 0.5))
             popup.open()
 
     def on_request_close(self, *args):
-        # This method will be called when the close button is clicked
         self.stop()  # Stop the application cleanly
         return True  # Return True to indicate that the window can be closed
 
@@ -125,6 +122,6 @@ if __name__ == '__main__':
         try:
             initial_tab = int(sys.argv[1])
         except ValueError:
-            pass  # Use default if argument is not an integer
+            pass  
 
     EthActsApp(initial_tab=initial_tab).run()
